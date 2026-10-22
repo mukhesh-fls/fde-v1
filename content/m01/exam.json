@@ -1,0 +1,127 @@
+{
+  "moduleId": "m01",
+  "title": "AI01 module exam",
+  "passMark": 0.7,
+  "questions": [
+    {
+      "prompt": "Your FastAPI handler is async def, but it calls requests.post() to reach the model provider. Under load, even /health becomes slow. Why?",
+      "options": [
+        "The provider is rate-limiting your health check",
+        "requests is blocking, so each call freezes the event loop for every request",
+        "FastAPI can only serve 10 requests at a time"
+      ],
+      "answer": 1,
+      "explain": "A blocking call inside async code stops the single event loop thread, so every route waits. Switch to an async client such as httpx.AsyncClient."
+    },
+    {
+      "prompt": "You run asyncio.gather over 500 model calls at once and get a flood of 429s. What do you change?",
+      "options": [
+        "Switch to blocking calls so they run one at a time",
+        "Run each call in a new event loop",
+        "Cap concurrency with a Semaphore and retry 429s with jittered backoff"
+      ],
+      "answer": 2,
+      "explain": "The provider can only take so many calls at once, so limit how many are in flight and back off when told to. Blocking calls would fix the 429s but make everything 500 times slower."
+    },
+    {
+      "prompt": "A client sends a 2 MB prompt to POST /chat. What should your API do?",
+      "options": [
+        "Forward it; the model will truncate it",
+        "Reject it at the boundary with a 4xx (413 or 422) and a clear error body, before any model call",
+        "Return a 500 so the client knows something went wrong"
+      ],
+      "answer": 1,
+      "explain": "Oversize input is the client's problem and should be stopped before it costs you a model call. A 500 blames your server, and forwarding it wastes money and may fail anyway."
+    },
+    {
+      "prompt": "Your mobile team says errors from /chat and /upload have different shapes, and the app crashes parsing them. What's the fix?",
+      "options": [
+        "Register exception handlers so every endpoint returns the same {error: {code, message}} body",
+        "Return all errors as 200 with an error flag",
+        "Document both shapes so the app can handle each"
+      ],
+      "answer": 0,
+      "explain": "One contract across all endpoints means one error parser in the client. Returning errors as 200 breaks status-code handling everywhere."
+    },
+    {
+      "prompt": "You're building a voice assistant where users can interrupt while it's speaking. Which transport fits best?",
+      "options": [
+        "SSE, because it's simpler",
+        "Plain HTTP polling every second",
+        "Websockets, because both sides send continuously"
+      ],
+      "answer": 2,
+      "explain": "Interruption needs the client to send while the server is still streaming, which websockets support. SSE only goes from server to client."
+    },
+    {
+      "prompt": "Your bill shows the provider kept generating for up to 40 s after users closed their tabs. What do you change?",
+      "options": [
+        "Detect the client disconnect while streaming and close the upstream stream",
+        "Lower the model temperature",
+        "Buffer the answer and send it all at the end"
+      ],
+      "answer": 0,
+      "explain": "Closing the provider's stream when the client leaves stops generation, and the cost with it. Buffering makes the experience worse and doesn't stop anything."
+    },
+    {
+      "prompt": "During a provider slowdown you add a 2 s timeout and 3 immediate retries. Now 429s spike and recovery takes longer. What's going on?",
+      "options": [
+        "The timeout is too long",
+        "A retry storm: timed-out calls still run on the provider and instant retries add more on top",
+        "The provider is returning 400s"
+      ],
+      "answer": 1,
+      "explain": "Timeouts free your workers but not the provider, so abandoned calls plus instant retries push it past capacity. Use exponential backoff with full jitter and a retry budget."
+    },
+    {
+      "prompt": "A call that confirms a ₹5,000 payment times out, and you don't know if it went through. What makes retrying it safe?",
+      "options": [
+        "Retrying immediately before the provider notices",
+        "Waiting 10 minutes before retrying",
+        "Sending the same idempotency key on every attempt so the provider returns the first result"
+      ],
+      "answer": 2,
+      "explain": "With the same key, the provider recognises a repeat and doesn't charge twice. Waiting longer doesn't change the fact that it may already have succeeded."
+    },
+    {
+      "prompt": "Your Dockerfile is FROM python:3.12, COPY . ., RUN pip install -r requirements.txt. Every code change takes 6 minutes in CI. What's the main fix?",
+      "options": [
+        "Copy requirements.txt and run pip install before copying the rest of the code",
+        "Add more CPU to the CI runner",
+        "Use RUN rm to clean up after the install"
+      ],
+      "answer": 0,
+      "explain": "With dependencies installed before the code copy, the slow install layer stays cached when only code changes. More CPU only speeds up a step that shouldn't run at all."
+    },
+    {
+      "prompt": "A coding agent's PR wraps send_invoice_email() in a retry loop. The tests pass and the demo works. What do you check first?",
+      "options": [
+        "Whether the function names follow the style guide",
+        "Whether the retry count is a nice round number",
+        "Whether a retry can send the same invoice twice, and whether there's a test or idempotency key that prevents it"
+      ],
+      "answer": 2,
+      "explain": "Retrying a call with side effects can duplicate them, which is exactly the kind of bug a demo misses. Style details can wait."
+    },
+    {
+      "prompt": "You need an index on a 50-million-row conversations table in production, during business hours. What do you run?",
+      "options": [
+        "CREATE INDEX inside a transaction",
+        "CREATE INDEX CONCURRENTLY, then check that the index is valid",
+        "Nothing until a maintenance window, since any index locks the table"
+      ],
+      "answer": 1,
+      "explain": "CONCURRENTLY builds the index without blocking writes, and you check afterwards that it didn't end up INVALID. A plain CREATE INDEX would block inserts for the whole build."
+    },
+    {
+      "prompt": "A customer's chat failed at 02:13. You have JSON logs with request IDs, and the error screen showed her an ID. What's the fastest path to the cause?",
+      "options": [
+        "Filter logs by her request ID and read the lines in order to find the failing step",
+        "Search for all ERROR lines between 02:00 and 02:30",
+        "Ask her to reproduce the problem"
+      ],
+      "answer": 0,
+      "explain": "Her request ID picks out exactly her lines across every step and service. A time-window search brings back every other request from that moment too."
+    }
+  ]
+}

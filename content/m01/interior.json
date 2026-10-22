@@ -1,0 +1,17 @@
+{
+  "_note": "Terminal 1 interior. Floor is centred on the origin; x runs east, z runs south. The entrance is on the south wall, the gates and Model City are to the north.",
+  "floor": { "min": [-34, -20], "max": [34, 20] },
+  "entrance": [0, 19],
+  "stations": {
+    "m01-s01": { "position": [-22, 10], "prop": "ground-staff" },
+    "m01-s02": { "position": [-22, -5], "prop": "check-in" },
+    "m01-s03": { "position": [-9, -13], "prop": "gate" },
+    "m01-s04": { "position": [7, -13], "prop": "rebooking" },
+    "m01-s05": { "position": [22, -12], "prop": "cargo" },
+    "m01-s06": { "position": [24, 4], "prop": "hangar" },
+    "m01-s07": { "position": [9, 5], "prop": "records" },
+    "m01-s08": { "position": [-7, 4], "prop": "tower-room" }
+  },
+  "examGate": { "position": [24, 15], "label": "Departure gate · Module exam" },
+  "modelCity": { "position": [0, -58] }
+}

@@ -1,0 +1,23 @@
+{
+  "programme": "AI for Tech Professionals",
+  "world": "Futurelab AI Airport",
+  "modules": [
+    {"id":"m01","code":"AI01","level":"L1","title":"Software foundations for AI systems","building":"Terminal 1","status":"boarding","stations":["Ground Staff Desk","Check-in & Document Check","Gate Announcements","Rebooking Desk","Cargo Container Bay","Maintenance Hangar","Passenger Records Office","Control Tower Room"]},
+    {"id":"m02","code":"AI02","level":"L1","title":"Machine learning and deep learning essentials","building":"Flight Training Centre","status":"scheduled"},
+    {"id":"m03","code":"AI03","level":"L1","title":"How LLMs work: transformers from scratch","building":"Engine Hangar","status":"scheduled"},
+    {"id":"m04","code":"AI04","level":"L1","title":"Working with model APIs","building":"Airline Desks","status":"scheduled"},
+    {"id":"m05","code":"AI05","level":"L2","title":"Prompt and context engineering","building":"Flight Planning Office","status":"scheduled"},
+    {"id":"m06","code":"AI06","level":"L2","title":"Embeddings, search and RAG","building":"Baggage Hall & Lost and Found","status":"scheduled"},
+    {"id":"m07","code":"AI07","level":"L2","title":"Data engineering and enterprise integration","building":"Cargo Terminal","status":"scheduled"},
+    {"id":"m08","code":"AI08","level":"L2","title":"Agents, tools and MCP","building":"Ground Operations","status":"scheduled"},
+    {"id":"m09","code":"AI09","level":"L2","title":"Evals and testing for AI","building":"Safety & Certification Office","status":"scheduled"},
+    {"id":"m10","code":"AI10","level":"L2","title":"AI product design and UX","building":"Lounge & Signage","status":"scheduled"},
+    {"id":"m11","code":"AI11","level":"L3","title":"Inference, serving and LLMOps","building":"Runway Operations","status":"scheduled"},
+    {"id":"m12","code":"AI12","level":"L3","title":"Cloud, infrastructure and client-environment deployment","building":"Partner Airport Site","status":"scheduled"},
+    {"id":"m13","code":"AI13","level":"L3","title":"Fine-tuning and post-training","building":"Pilot Academy","status":"scheduled"},
+    {"id":"m14","code":"AI14","level":"L3","title":"Multimodal, speech and Indian languages","building":"Information Desk & Announcements","status":"scheduled"},
+    {"id":"m15","code":"AI15","level":"L3","title":"Security, safety and governance","building":"Security Checkpoint & Customs","status":"scheduled"},
+    {"id":"m16","code":"AI16","level":"FDE","title":"The forward deployment craft","building":"Field Office","status":"scheduled"},
+    {"id":"m17","code":"AI17","level":"FDE","title":"Client leadership and commercial skills","building":"Authority Boardroom","status":"scheduled"}
+  ]
+}

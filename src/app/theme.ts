@@ -1,0 +1,23 @@
+/** Palette from docs/04-engine.md. Keep every colour in the app coming from here. */
+export const palette = {
+  background: "#F3F5F8",
+  ground: "#E4E8ED",
+  grass: "#D6E2D8",
+  paving: "#DCE1E7",
+  road: "#CBD2DB",
+  roadLine: "#FFFFFF",
+  runway: "#B8C0CB",
+  taxiLine: "#E1A400",
+  building: "#FFFFFF",
+  buildingAlt: "#E6E9EE",
+  lockedBuilding: "#F1F3F6",
+  lockedRoof: "#E3E6EB",
+  glass: "#3F7FE0",
+  lockedGlass: "#AFC0D6",
+  accent: "#2F6FED",
+  success: "#23884D",
+  warning: "#E1A400",
+  error: "#D9363E",
+  ink: "#1B2430",
+  inkMuted: "#5B6676",
+} as const;

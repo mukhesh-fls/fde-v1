@@ -1,0 +1,944 @@
+{
+  "id": "p2-l1",
+  "programme": "AI for Tech Professionals",
+  "level": "Level 1 · Foundations",
+  "outcome": "Learners can explain what an agent is, describe how an LLM behaves and why, and manage the context window as a core engineering concern.",
+  "lessons": [
+    {
+      "id": "p2l1-e1",
+      "episode": 1,
+      "title": "What makes AI agentic",
+      "tagline": "From systems that answer questions to systems that take actions.",
+      "sections": [
+        {
+          "heading": "From answering to acting",
+          "body": "Most AI you have used so far answers a question and stops. An agentic system goes further: it takes actions. It can search, call an API, edit a file or update a ticket, then look at what happened and decide what to do next. That shift changes the engineering. An answer can be wrong and the user just ignores it. An action changes something in the world, costs time and money, and can feed a bad result into the next step. So the question stops being only \"is the answer good?\" and becomes \"is this whole loop safe, bounded and worth its cost?\""
+        },
+        {
+          "heading": "Four kinds of AI system",
+          "body": "There is a range. A chatbot takes your input, calls the model once and returns an answer. A workflow runs fixed steps that a developer wrote in advance, with the model doing work inside some of them. An agent puts the model in a loop with tools, and the model picks the next step each turn. Multiple agents split a large task: a lead agent hands subtasks to workers and merges what comes back. The defining difference is simple. In an agent, the model chooses the next action. In a workflow, the developer does."
+        },
+        {
+          "heading": "The agent loop",
+          "body": "Every agent runs the same loop. It assesses the situation: what is the goal, what do I know, what has happened so far? It decides on an action, such as which tool to call and with what input. It acts through that tool. It checks the result: did that work, am I closer to the goal? Then it repeats until the goal is met or a limit is reached. That last part matters. A loop with no limit can keep spending tokens on a task it will never finish. Every loop needs a step count, a budget or a person who can stop it."
+        },
+        {
+          "heading": "Agents in use today",
+          "body": "You have probably met some already. Coding agents read a codebase, edit files, run the tests and try again when they fail. Research agents search, read sources and pull findings together. Customer support agents look up a booking, check a policy and take an action like issuing a refund. Operations agents watch alerts, look at logs and run fixes from a runbook. What they share is an open-ended task where the right next step depends on what the last step found. That is where an agent earns its extra cost."
+        },
+        {
+          "heading": "When to use an agent, and when not to",
+          "body": "Agents fit open-ended tasks with many possible paths, where you cannot write the steps down in advance. If you can write the steps down, write them down. A script or fixed workflow is the better choice when the steps are known, when an error is costly, or when you need strict speed and predictability. A refund that always follows the same three checks should be a workflow. Agents are harder to build well because each loop adds time and cost, and an error in an early step carries into every later one. Use an agent only when the task needs the model to choose."
+        }
+      ],
+      "systemsLens": "An agent is a loop, and every loop needs a limit, such as a step count, a budget or a person who can stop it.",
+      "remember": [
+        "Agents choose their next step.",
+        "Use an agent only when the task requires that choice.",
+        "Every loop needs a limit."
+      ],
+      "models": [
+        {
+          "id": "system-types",
+          "title": "Four kinds of AI system",
+          "intro": "Four small pipelines run side by side: a chatbot, a workflow, an agent and a multi-agent team. Pick a task, send it, and compare steps, time, cost and quality across the lanes.",
+          "stages": [
+            {
+              "id": "chatbot",
+              "title": "Chatbot: one call",
+              "body": "The token goes in, passes through the model once, and comes out as an answer. There are no tools and no loop, so it is the fastest and cheapest lane. For a simple question that is all you need. For a task that needs several actions, it can only describe what to do. It cannot do it, so quality drops."
+            },
+            {
+              "id": "workflow",
+              "title": "Workflow: fixed steps",
+              "body": "The token moves through step 1, step 2 and step 3 in an order the developer wrote. The model may do work inside a step, but it never chooses the path. For a known three-step process this lane wins: predictable time, predictable cost, good results. Give it an open-ended task and the fixed steps miss whatever the developer did not plan for."
+            },
+            {
+              "id": "agent",
+              "title": "Agent: model picks",
+              "body": "Here the model sits in a loop with tool blocks around it. Each turn it looks at what it has, picks a tool, and the token travels to that tool and back. The number of steps is not fixed. On an open-ended research task this lane gives the best result. On a simple question it spends extra steps and money for no gain."
+            },
+            {
+              "id": "multi-agent",
+              "title": "Multi-agent: split work",
+              "body": "A lead agent breaks the task up and hands subtasks to two worker agents. Each worker runs its own loop, then the lead merges the results. Watch the token counter: this lane always costs the most, because every agent reads and writes its own context. It can help on large tasks that split cleanly. On small tasks it is pure overhead."
+            }
+          ],
+          "tryThis": [
+            "Set Task to Simple question and press Send task. Notice the chatbot gives a good answer in one step while the agent and multi-agent lanes cost several times more for the same quality.",
+            "Set Task to Known 3-step process and press Send task. Notice the workflow lane is good, fast and cheap, while the agent takes more steps to reach a similar result.",
+            "Set Task to Open-ended research task and press Send task. Notice the chatbot and workflow drop to poor or ok, and the agent is the first lane to reach good.",
+            "Compare the cost of the multi-agent lane across all three tasks. Notice it is the most expensive every time, so it needs a task big enough to justify it."
+          ]
+        },
+        {
+          "id": "agent-loop",
+          "title": "The agent loop",
+          "intro": "A token travels around four stations: Assess, Decide, Act and Check. Press Run with the defaults first, then raise the tool failure rate and watch what happens with and without a step limit.",
+          "stages": [
+            {
+              "id": "assess",
+              "title": "Assess the situation",
+              "body": "At Assess the agent reads everything it has: the goal, the history so far and the last tool result. This is where it works out how far it still is from done. Watch the token counter tick up here each lap. The agent pays to reread its context on every turn, so a long loop gets more expensive per step, not just in total."
+            },
+            {
+              "id": "decide",
+              "title": "Decide on an action",
+              "body": "At Decide the model picks the next action: which tool to call and with what input. This is the step that makes it an agent. Nobody wrote this choice in advance. If an earlier step went wrong, the decision here is built on a bad premise, which is how early errors carry forward into later steps."
+            },
+            {
+              "id": "act",
+              "title": "Act through a tool",
+              "body": "At Act the token leaves the model and goes through a tool, such as a search, an API call or a database query. Tools are where the agent touches the real world, and where things fail. When a tool call fails you will see the token bounce back. The task is not done, so the loop needs another lap."
+            },
+            {
+              "id": "check",
+              "title": "Check the result",
+              "body": "At Check the agent compares the result with the goal. If the goal is met, the loop ends and the step counter stops. If not, the token goes back to Assess for another lap. With a high tool failure rate, more laps end here with \"not yet\", and the step count climbs well past the steps the task really needs."
+            },
+            {
+              "id": "limit",
+              "title": "The brake",
+              "body": "When the step limit is reached, a stop gate drops across the loop and the run ends, finished or not. With Step limit set to Off there is no gate. If tools keep failing, the loop keeps going until the token budget runs out, and the bar turns red with \"ran away\". A stopped run you can inspect beats a runaway bill."
+            }
+          ],
+          "tryThis": [
+            "Leave Tool failure rate at 0% and set Steps the task needs to 4. Press Run. Notice the loop finishes in exactly 4 laps.",
+            "Raise Tool failure rate to 40% and press Run again. Notice the step count and tokens spent grow well past 4, because failed laps do not move the task forward.",
+            "Set Tool failure rate to 60% and Step limit to Off, then press Run. Notice the loop keeps going until the budget bar turns red and shows \"ran away\".",
+            "Keep the failure rate at 60% and set Step limit to 8. Press Run. Notice the stop gate drops and the run ends with most of the budget left."
+          ]
+        }
+      ],
+      "quiz": [
+        {
+          "prompt": "Your team needs to process expense claims: check the receipt total, compare it with the policy limit, then approve or flag it. The steps never change. What should you build?",
+          "options": [
+            "An agent, so it can handle unusual claims on its own",
+            "A fixed workflow, with the model doing work inside the steps that need it",
+            "A multi-agent system, with one agent per step"
+          ],
+          "answer": 1,
+          "explain": "The steps are known and an error is costly, so a workflow gives you predictable speed and cost. An agent sounds more capable, but here it only adds loops, cost and room for the model to choose a wrong path."
+        },
+        {
+          "prompt": "What is the defining difference between an agent and a workflow?",
+          "options": [
+            "An agent uses a larger model than a workflow",
+            "An agent can call tools and a workflow cannot",
+            "In an agent the model chooses the next action; in a workflow the developer does"
+          ],
+          "answer": 2,
+          "explain": "Who chooses the next step is the whole difference. Workflows can call tools too, so tool use alone does not make something an agent."
+        },
+        {
+          "prompt": "A support agent keeps calling a flaky booking API that fails half the time. Overnight it ran thousands of loops on one ticket. What was missing?",
+          "options": [
+            "A limit on the loop, such as a step count, a budget or a person who can stop it",
+            "A smarter model that picks better tools",
+            "A longer context window so it remembers earlier failures"
+          ],
+          "answer": 0,
+          "explain": "Every loop needs a limit, because a loop that cannot reach its goal will otherwise run until something external stops it. A better model may waste fewer steps, but without a limit it can still run away."
+        }
+      ]
+    },
+    {
+      "id": "p2l1-e2",
+      "episode": 2,
+      "title": "Thinking in systems",
+      "tagline": "A system is parts, plus the connections between them.",
+      "sections": [
+        {
+          "heading": "What a system is",
+          "body": "A system is a set of parts, the connections between them, and a purpose. A kitchen is not just a stove and a fridge. It is how orders move, who waits on whom, and what happens when the stove is busy. The same is true of AI products. An AI agent is a system made of the model, its knowledge (documents, databases, indexes), its tools, the rules it follows, and the people who use it, review it and step in when it fails. When you design an agent, you are designing all of these and how they connect."
+        },
+        {
+          "heading": "Failures live between the parts",
+          "body": "Most failures happen in the connections, not inside a single part. A slow tool on its own is fine. Eager retries on their own are fine. Put them together and you get a storm: the tool slows down, callers time out and retry, the extra traffic slows the tool further, and soon everything is down. Nobody wrote a bug. Each part did what it was told. This is why you test parts together under real load, and why you read your architecture as a set of arrows, not just a set of boxes."
+        },
+        {
+          "heading": "Stocks",
+          "body": "A stock is a quantity that builds up or drains over time. The context window is a stock: each turn adds history and tool results, and summarising or removing takes tokens out. Your budget is a stock: every call drains it. User trust is a stock too. It builds slowly with good answers and can drain quickly after one confident wrong one. Stocks matter because they change gradually, so a problem can grow for a while before anyone notices. For each stock, ask what flows in, what flows out, and what happens when it hits its limit."
+        },
+        {
+          "heading": "Feedback loops and delays",
+          "body": "A feedback loop is when a change comes back around and affects itself. A reinforcing loop amplifies change: failures cause retries, retries cause more load, more load causes more failures. That is a retry storm. A balancing loop holds a system steady: a budget cap, a rate limit or backoff pushes back as things grow. Delays make both harder to see. Stale data in a search index can mislead the agent for days before anyone notices. A cost increase may only show up in the bill at month end. Give every reinforcing loop a brake."
+        },
+        {
+          "heading": "Drawing a simple system map",
+          "body": "You can map an AI product on one page. Draw a box for each part: user, app, model, tools, knowledge, rules, people. Draw arrows for what flows between them, such as requests, tokens, documents, money and approvals. Then mark three things. Circle the stocks: context, budget, index, trust. Trace any loop where an output comes back as an input, and label it reinforcing or balancing. Note the delays, where an effect shows up long after its cause. The missing brake on a reinforcing loop is usually where your next outage is."
+        }
+      ],
+      "systemsLens": "Look at the connections, not just the parts.",
+      "remember": [
+        "Look at connections, not just parts.",
+        "Find the stocks and the loops.",
+        "Give every reinforcing loop a brake."
+      ],
+      "models": [
+        {
+          "id": "stock-flow",
+          "title": "The context window as a stock",
+          "intro": "A glass tank holds the context window, measured in tokens. Set how much flows in and out each turn, press Play, and watch whether the level settles or hits the red line.",
+          "stages": [
+            {
+              "id": "stock",
+              "title": "The stock",
+              "body": "The tank is the context window. The water level is how many tokens it holds right now. The level does not jump; it rises or falls a little each turn. That is what makes it a stock. You cannot read its future from one turn. You have to watch the flows over many turns to see where it is heading."
+            },
+            {
+              "id": "inflow",
+              "title": "What flows in",
+              "body": "The inflow pipe adds tokens every turn: the user's new message, the model's reply, and any tool results. Agents add the most, because tool results such as search pages or file contents can be large. The more turns you run, the more the inflow adds up, even when each single turn looks small."
+            },
+            {
+              "id": "outflow",
+              "title": "What flows out",
+              "body": "The outflow pipe removes tokens: summarising old history into a short note, or dropping tool results you no longer need. If the outflow is smaller than the inflow, the level keeps rising. If they match, the level holds steady. Your design choices set the size of this pipe. Without one, nothing ever leaves."
+            },
+            {
+              "id": "limit",
+              "title": "The red line",
+              "body": "The red line is the window's fixed maximum. As the level gets close, answer quality starts to drop, because the model has more to look at and the useful parts get crowded out. Past the line, the tank overflows: older content is cut off or the call fails. A stock with a hard limit needs an outflow before it gets there."
+            }
+          ],
+          "tryThis": [
+            "Set Removed per turn to 0, Turns to 40, and press Play. Notice the level climbs every turn until it crosses the red line and quality drops.",
+            "Set Removed per turn equal to Added per turn and press Play. Notice the level stays flat no matter how many turns you run.",
+            "Set Added per turn high and Removed per turn to about half of it, with Turns at 10. Press Play, then raise Turns to 40. Notice that a design that looks safe for 10 turns overflows on a longer conversation."
+          ]
+        },
+        {
+          "id": "feedback-loops",
+          "title": "Retry storms and brakes",
+          "intro": "Clients send requests to a provider tower, and bars show load per second against the provider's capacity. Turn on Provider slowdown with retries enabled and watch a reinforcing loop take over, then add the brakes.",
+          "stages": [
+            {
+              "id": "request",
+              "title": "Normal traffic",
+              "body": "Requests travel from the clients on the left to the provider tower. While load stays under the capacity line, every request is answered and the bars stay flat. Nothing here looks risky. Each part works on its own, which is exactly why the problem in the next stages is easy to miss in design reviews."
+            },
+            {
+              "id": "failure",
+              "title": "Some requests fail",
+              "body": "When the provider slows down or load goes over the capacity line, some requests fail and turn red. On its own this is a small, bounded problem: a share of users get an error. What happens next depends on how the clients react. That reaction is a connection between parts, and it decides whether the system recovers."
+            },
+            {
+              "id": "retry-storm",
+              "title": "The reinforcing loop",
+              "body": "Failed requests loop back as retries, shown by the red circular arrow. Retries add load, more load causes more failures, and more failures cause more retries. Watch the bars climb far above the capacity line even though the number of real users has not changed. This is a reinforcing loop: it amplifies the original problem until the provider is overwhelmed."
+            },
+            {
+              "id": "brake",
+              "title": "The balancing loop",
+              "body": "The green loop is the brake. Backoff with jitter makes clients wait longer after each failure, at slightly random times, so retries spread out instead of arriving together. A retry budget caps how many retries are allowed in total. Both push back as load grows, which is a balancing loop. The bars drop back toward the capacity line and the provider gets room to recover."
+            }
+          ],
+          "tryThis": [
+            "Turn on Provider slowdown, set Retries per failure to 0, and press Run. Notice some requests fail, but the load bars stay near the capacity line.",
+            "Keep Provider slowdown on and set Retries per failure to 3. Press Run. Notice the red loop appears and the bars climb far above capacity with the same number of clients.",
+            "With retries still at 3, turn on Backoff with jitter and press Run. Notice the bars flatten as retries spread out over time.",
+            "Turn on Retry budget as well, and raise Clients. Press Run. Notice the green loop holds load near capacity even as traffic grows."
+          ]
+        }
+      ],
+      "quiz": [
+        {
+          "prompt": "Your search tool got a little slower after a deploy. An hour later the whole support bot is down, and every service reports it is working as designed. Where should you look first?",
+          "options": [
+            "Inside the model, for a new bug in how it answers",
+            "At the connection between the slow tool and the callers' retry and timeout settings",
+            "At the user interface, because users are sending more messages"
+          ],
+          "answer": 1,
+          "explain": "Most failures happen between parts, and a slow tool combined with eager retries is a classic reinforcing loop. The model is the tempting suspect, but nothing about it changed."
+        },
+        {
+          "prompt": "Which of these is a balancing loop?",
+          "options": [
+            "A daily budget cap that stops calls once spending reaches a limit",
+            "Clients retrying immediately whenever a request fails",
+            "Each agent turn adding its tool results to the context window"
+          ],
+          "answer": 0,
+          "explain": "A budget cap pushes back as spending grows, which holds the system steady. Immediate retries amplify failure, so they form a reinforcing loop, not a balancing one."
+        },
+        {
+          "prompt": "Your agent's costs doubled in the first week of the month, but the team only saw it when the invoice arrived. What systems idea explains why nobody noticed?",
+          "options": [
+            "A reinforcing loop",
+            "A missing part in the system",
+            "A delay between cause and visible effect"
+          ],
+          "answer": 2,
+          "explain": "The effect appeared well after its cause, which is a delay. There may also be a loop driving the cost, but the reason nobody saw it was that the signal arrived weeks late."
+        }
+      ]
+    },
+    {
+      "id": "p2l1-e3",
+      "episode": 3,
+      "title": "Inside the LLM",
+      "tagline": "How a language model produces its output.",
+      "sections": [
+        {
+          "heading": "It predicts the next token",
+          "body": "A language model does one thing: it predicts the next token, one at a time, based on everything in its input. It reads your prompt, scores every possible next token, picks one, adds it to the end, and repeats. A long answer is just this step run hundreds of times. A token is a unit of text, often a word or part of a word. \"Rebooking\" might be two tokens: \"Re\" and \"booking\". Cost, speed and limits are all measured in tokens, so you will count them the way you count milliseconds and bytes."
+        },
+        {
+          "heading": "The context window, and no memory",
+          "body": "The context window is everything the model can see in a single call: your instructions, the conversation so far, any documents and the answer it is writing. It has a fixed maximum size. Anything outside it does not exist for the model. The model also retains nothing between calls. Each call uses only the input it is given. When a chat app seems to remember you, it is because the app sends the earlier messages again with every request. Memory is your job, not the model's."
+        },
+        {
+          "heading": "Temperature and sampling",
+          "body": "At each step the model gives a probability to every candidate token. Sampling picks one. At temperature 0 it takes the most likely token, so the same input gives nearly the same output each time. Higher temperature flattens the odds, so less likely tokens get picked more often, and the same input can give different outputs. Use low temperature when you need consistency: extraction, classification, structured output, anything you test. Allow more variation when you want options, such as drafting several versions of a message for a person to choose from."
+        },
+        {
+          "heading": "Reasoning models",
+          "body": "Reasoning models work through a problem before they answer. They generate a chain of intermediate tokens, trying steps and checking them, and then give a final answer. This improves results on complex tasks like multi-step maths, tricky code or planning. It costs time and tokens: you pay for the thinking tokens too, and the first word of the answer arrives later. For a simple lookup or a short rewrite, a reasoning model is slower and more expensive with no gain. Choose it when the task really needs several steps of thought."
+        },
+        {
+          "heading": "Why hallucinations happen",
+          "body": "The model always produces fluent output. It was trained to continue text in a plausible way, not to check facts. When it has the right information in its context, the plausible next token is usually correct. When it does not, it still produces the most plausible-sounding answer, such as a policy that does not exist or a flight number that looks right. That wrong answer reads exactly as confidently as a correct one. Fluent output is not necessarily correct, so give the model the facts it needs and check what matters."
+        },
+        {
+          "heading": "How models are trained, in brief",
+          "body": "Before you ever call a model, two rounds of training have happened. Pre-training runs over a very large collection of text, adjusting billions of weights so the model gets good at predicting the next token. That gives it language, facts and patterns, but it just continues text. Then instruction training teaches it to follow requests, answer helpfully and refuse some things, using examples and feedback from people. You control neither. In any call, the output depends on that training and on the context you provide. Only the context is under your control."
+        }
+      ],
+      "systemsLens": "In any given call, the model's output depends on its training and on the context provided. Only the context is under your control.",
+      "remember": [
+        "The model predicts tokens.",
+        "It retains nothing between calls.",
+        "Fluent output is not necessarily correct."
+      ],
+      "models": [
+        {
+          "id": "next-token",
+          "title": "Inside a transformer",
+          "intro": "Your text goes up through a transformer, the architecture inside every modern LLM: tokens, embeddings, a stack of blocks with attention and feed-forward layers, then probabilities for the next token. This is a small teaching model trained on about 80 airline-support sentences, not a real LLM, but the parts and their order are the real ones. Press Next token and watch one forward pass.",
+          "stages": [
+            {
+              "id": "tokens",
+              "title": "Text becomes tokens",
+              "body": "Along the bottom, your prompt is split into tokens, one block each. Common words get one token; longer words split into pieces, such as benga and -luru. The count of tokens, not words, sets cost, speed and whether the text fits. Click any token to see where it looks in the attention layers above."
+            },
+            {
+              "id": "embeddings",
+              "title": "Tokens become numbers",
+              "body": "Each token becomes a vector: the row of cyan and pink bars is its numbers (positive and negative). The amber wave above is the position signal added to it, because attention by itself can't tell word order. Real models use thousands of numbers per token; this one shows eight."
+            },
+            {
+              "id": "attention",
+              "title": "Tokens look back",
+              "body": "In each block, the glass slab is self-attention. The coloured chips are four attention heads, each looking for something different: related meaning, the previous token, the start of the text, recent words. The glowing arcs show where the focused token is looking, thicker for more attention. Click another token to move the focus."
+            },
+            {
+              "id": "layers",
+              "title": "Stacked layers",
+              "body": "A block is attention followed by a feed-forward layer: the diamonds, where each token's vector expands and contracts and where much of the model's knowledge sits. Lavender rings are layer normalisation. The vertical lines are the residual stream: each layer adds its result to it. This model shows 4 blocks; real LLMs stack 30 to 100 or more."
+            },
+            {
+              "id": "probabilities",
+              "title": "Scores for every candidate",
+              "body": "At the top, the last token's final vector is compared with every word in the vocabulary (unembedding), and softmax turns the scores into probabilities. The bars on the right are the top candidates for the next token. Temperature reshapes these bars before one is picked."
+            },
+            {
+              "id": "sampling",
+              "title": "Picking one token",
+              "body": "One token is picked from the bars: at temperature 0 always the tallest, at higher temperature sometimes a shorter one. Watch the green light drop from the chosen bar into the token row. Then the whole pass runs again for the next token. Generating text is this loop, one token at a time."
+            },
+            {
+              "id": "context-window",
+              "title": "The window's edge",
+              "body": "The cyan rails under the tokens mark the context window. Only tokens inside it reach the model; tokens outside go dim and drop out of attention. Set Context window to 8 and generate: the earliest tokens fall outside and stop influencing what comes next."
+            }
+          ],
+          "tryThis": [
+            "Press Next token and watch the forward pass: light rises through the blocks, then the chosen token drops into the row.",
+            "Set Temperature to 0 and press Generate 8, then Reset and do it again. The text is the same both times because the tallest bar always wins.",
+            "Set Temperature to 1.5 and repeat. The bars flatten and the two runs differ.",
+            "Click different tokens and open the attention step: each head's arcs move to show where that token looks.",
+            "Set Context window to 8 and press Generate 8 a few times. The earliest tokens dim and their arcs disappear."
+          ]
+        },
+        {
+          "id": "neural-net",
+          "title": "A tiny neural network",
+          "intro": "This small network routes a support message to the refunds team or to general support. Move the input sliders first, then change weights by hand, then press Train 50 steps and watch the loss go down.",
+          "stages": [
+            {
+              "id": "inputs",
+              "title": "Inputs are features",
+              "body": "The three nodes on the left are the inputs: \"Mentions money\", \"Mentions delay\" and \"Angry tone\", each a number from 0 to 1. A network only ever sees numbers. In a real LLM the inputs are token embeddings with thousands of numbers each, but the idea is the same: a message becomes a list of numbers before anything is computed."
+            },
+            {
+              "id": "weights",
+              "title": "Weights are the knowledge",
+              "body": "The tubes are weights. Thickness shows how large a weight is, blue means it pushes the next node up, and orange means it pushes it down. Everything this network \"knows\" lives in these numbers. A real LLM has billions of them. You will never set them by hand. Training sets them, long before you call the model."
+            },
+            {
+              "id": "activations",
+              "title": "Hidden nodes light up",
+              "body": "Each of the four hidden nodes adds up its inputs times their weights, adds its bias, and passes the result through a simple function. The glow shows its activation. One node might end up lighting for \"money and anger\", another for \"delay\". Nobody named these. They come from the weights."
+            },
+            {
+              "id": "outputs",
+              "title": "Two probabilities",
+              "body": "The two output nodes give probabilities for \"Send to refunds team\" and \"Send to general support\". They always add up to 100%. Like the next-token bars, this is a score, not a certainty. Change one input slider and watch both numbers shift together."
+            },
+            {
+              "id": "training",
+              "title": "Training sets the weights",
+              "body": "Train 50 steps compares the network's outputs with 8 labelled example messages, then nudges every weight a little in the direction that reduces the error. The loss number is that error, and it goes down as weights settle. Real models go through pre-training on huge text collections, then instruction training, all before you ever call them."
+            }
+          ],
+          "tryThis": [
+            "Press Reset weights, then raise Mentions money to 1 with the other inputs at 0. Notice the output leans toward Send to refunds team.",
+            "Click the thickest blue tube from Mentions money, then drag its Weight slider to −3. Notice the tube turns orange and the refunds probability drops.",
+            "Press Random weights and check a few input settings. Notice the routing makes little sense. Then press Train 50 steps a few times and watch the loss fall and the routing become sensible.",
+            "Select a hidden node and move its Bias slider. Notice its glow changes even when the inputs stay the same."
+          ]
+        },
+        {
+          "id": "loss-landscape",
+          "title": "How training finds weights",
+          "intro": "A network with two weights, drawn as a landscape: each point is a pair of weights, and its height is the error on the training examples. Training rolls the weights downhill. Press Train, then try a larger learning rate.",
+          "stages": [
+            {
+              "id": "surface",
+              "title": "The error surface",
+              "body": "Every point on this surface is one possible pair of weights. The height is how wrong the network is on its training examples with those weights. Low green areas are good weights; high purple ridges are bad ones. A real LLM has billions of weights, so its surface has billions of dimensions, but the idea is the same."
+            },
+            {
+              "id": "position",
+              "title": "Where the weights are now",
+              "body": "The pink ball is the network's current weights. Its height is the current error. Training never sees the whole surface at once. It only knows the height and the slope right where the ball is, which is why it moves in small steps."
+            },
+            {
+              "id": "slope",
+              "title": "Feel the slope",
+              "body": "The red arrow points straight downhill from the ball. This direction comes from the gradient: how much the error changes if each weight moves a little. Computing it for every weight at once is what backpropagation does."
+            },
+            {
+              "id": "step",
+              "title": "Take a step",
+              "body": "One training step moves the weights a short way along the arrow. Press Show next step to watch one. The mint dots are the trail of earlier steps. Each step lowers the error a little, until the ground is flat and the steps shrink to nothing."
+            },
+            {
+              "id": "learning-rate",
+              "title": "Step size: the learning rate",
+              "body": "The learning rate sets how far each step goes. Too small, and training crawls. Too large, and the ball jumps past the valley floor, lands higher up the other side, and the error goes up instead of down. Choosing it well is one of the most important settings in training."
+            },
+            {
+              "id": "local-minimum",
+              "title": "A local minimum",
+              "body": "The surface has a second, shallower dip. Start the ball there and it settles in that dip, because every direction nearby goes up. The weights are not the best possible, but training can't see further. Real training uses tricks such as noise, momentum and huge models to get past this."
+            }
+          ],
+          "tryThis": [
+            "Press Train with the default learning rate. Notice the steps get shorter as the ground flattens near the bottom.",
+            "Set the learning rate to large (above 2) and press Train. Notice the ball overshoots the valley and the error rises on some steps.",
+            "Press Start in the other basin, then Train. Notice the ball stops in the shallower dip with a higher error than the best weights.",
+            "Click anywhere on the surface to drop the ball there, then press Show next step a few times."
+          ]
+        },
+        {
+          "id": "api-call",
+          "title": "One API call, end to end",
+          "intro": "Follow a single request from your app to the model and back, with the time each hop takes. Press Send request with the defaults, then break it on purpose with the toggles.",
+          "stages": [
+            {
+              "id": "app",
+              "title": "Your app builds the request",
+              "body": "Your app builds a JSON request: the model name, max_tokens, the system prompt and the messages. Look at the request JSON in the side panel. The whole conversation is in there. The model keeps nothing between calls, so your app must send the history every time. Then the packet leaves over HTTPS across the internet."
+            },
+            {
+              "id": "gateway",
+              "title": "The gateway checks",
+              "body": "The API gateway checks two things before any model work happens. Is the API key valid? If not, the call stops here with a 401 error. Are you over your rate limit? If so, you get a 429 with a retry-after value telling you how long to wait. These fail fast and cost nothing, but your code must handle them."
+            },
+            {
+              "id": "tokenizer",
+              "title": "Text becomes tokens",
+              "body": "The tokenizer splits your input into tokens and counts them. This input token count is what you are billed for on the way in, and it sets how much work the model must do before it can write anything. A longer prompt means higher cost and a slower first token. The count shows in the side panel."
+            },
+            {
+              "id": "model",
+              "title": "The model generates",
+              "body": "On the GPUs, the model reads all input tokens, then generates the answer one token at a time. Each output token takes a little time and costs more than an input token. Generation stops when the model finishes or when it hits max_tokens. If it hits the limit, the answer is cut off mid-sentence."
+            },
+            {
+              "id": "stream",
+              "title": "Tokens travel back",
+              "body": "With streaming on, tokens are sent back as they are made, so the first words reach your app early while the rest are still being generated. With streaming off, the gateway waits for the whole answer and sends it at once. The total time is about the same. What changes is how long the user stares at a blank screen."
+            },
+            {
+              "id": "response",
+              "title": "The response arrives",
+              "body": "Your app gets the response JSON: the text, input and output token counts, and stop_reason. \"end_turn\" means the model finished. \"max_tokens\" means it was cut off, and your code should notice instead of showing half an answer. The cost is computed from the two token counts. To continue the conversation, you send all of it again."
+            }
+          ],
+          "tryThis": [
+            "Turn Streaming off and press Send request, then turn it on and send again. Notice the total time is similar, but the first words appear much sooner with streaming.",
+            "Turn off Valid API key and press Send request. Notice the packet stops at the gateway with a 401 and no tokens are counted or charged.",
+            "Set max_tokens to 8 and press Send request. Notice stop_reason is \"max_tokens\" and the answer is cut off.",
+            "Raise Prompt length and send again. Notice input tokens, cost and time to first token all go up."
+          ]
+        }
+      ],
+      "quiz": [
+        {
+          "prompt": "A user tells your chatbot their booking reference in message 1. In message 5 the bot asks for it again. Your app only sends the latest message with each API call. Why did the bot forget?",
+          "options": [
+            "The model's memory was cleared because the conversation was too long",
+            "The model retains nothing between calls, so it never saw message 1 in the fifth call",
+            "The temperature was too high, so it ignored the earlier message"
+          ],
+          "answer": 1,
+          "explain": "Each call uses only the input it is given, so the app must send the history every time. There is no model memory to clear, and temperature changes which tokens get picked, not what the model can see."
+        },
+        {
+          "prompt": "You run the same classification prompt twice and get two different labels. You need it to be consistent for your tests. What should you change first?",
+          "options": [
+            "Lower the temperature toward 0",
+            "Switch to a reasoning model",
+            "Increase max_tokens"
+          ],
+          "answer": 0,
+          "explain": "Temperature controls how much sampling varies, and at 0 the most likely token wins each time. A reasoning model may improve accuracy but adds time and cost without fixing the variation."
+        },
+        {
+          "prompt": "Your support bot confidently tells a customer that Kestrel refunds within 48 hours. The real policy is 7 days, and the policy was not in the context. What is the best explanation?",
+          "options": [
+            "The model was trained on Kestrel's old policy and remembered it",
+            "The API returned a cached answer from an earlier call",
+            "Without the facts, the model still produced the most plausible-sounding answer, which looks just as confident as a correct one"
+          ],
+          "answer": 2,
+          "explain": "The model always produces fluent output, so a missing fact becomes a confident guess. Blaming old training is tempting, but the fix is the same either way: put the real policy in the context and check what matters."
+        }
+      ]
+    },
+    {
+      "id": "p2l1-e4",
+      "episode": 4,
+      "title": "The LLM as a component",
+      "tagline": "A brilliant, unpredictable component. Design around it.",
+      "sections": [
+        {
+          "heading": "A component with a contract",
+          "body": "Treat the model like any other component in your system: something with a contract. The contract has three parts. Clear inputs: exactly what you send, in a consistent format. A fixed output shape: the fields you expect back, their types and allowed values. A plan for failure: what your code does when the output is late, wrong or missing. The model is brilliant at reading messy text and unpredictable in what it returns. The contract is how you get the brilliance without passing the unpredictability on to your users."
+        },
+        {
+          "heading": "Structured output you check",
+          "body": "Ask for structured output, usually JSON with a schema, so your code can use the answer directly. Then check every answer before using it. Parse it, validate it against the schema, and check the values make sense: is the refund amount positive, is the category one you support? Most of the time the model gets it right, but \"most of the time\" across millions of requests is still thousands of broken answers. Without a check, those go straight to users or into your database."
+        },
+        {
+          "heading": "When output is invalid",
+          "body": "When validation fails, you have three moves, in order. Retry once, and include the validation error in the new request, such as \"field amount was missing\". Models often fix the problem when told exactly what was wrong. If the retry also fails, fall back to a simpler path: a smaller task, a template answer, or a rule-based default. If that is not safe either, route to a person. Retry only once. Endless retries cost money and add latency, and they rarely fix a problem the first retry could not."
+        },
+        {
+          "heading": "Pin versions and set time limits",
+          "body": "Pin the exact model version in your code, not a name that moves to a newer model on its own. A new version can change tone, format and accuracy, and your validated contract can quietly break. Treat an upgrade like any dependency upgrade: run your test set on the new version, compare, and only then switch. Also set a time limit on every call. A model call can hang or run long. A timeout, one retry and a fallback together are the brake that keeps one slow call from holding up the whole system."
+        },
+        {
+          "heading": "Small models for simple tasks",
+          "body": "Not every task needs your largest model. Classifying a message, extracting a date or checking a format are simple tasks that a small model does quickly and cheaply. Writing a careful reply to an angry customer or reasoning over several policies is hard, and a large model does it better. Send simple tasks to small models and hard ones to large models. A router in front can decide by task type or difficulty. The trade-off is real: route too much to the small model and accuracy drops."
+        }
+      ],
+      "systemsLens": "An unpredictable component can still be part of a reliable system if the surrounding components validate and contain its output.",
+      "remember": [
+        "A contract.",
+        "Structure you check.",
+        "Pinned versions."
+      ],
+      "models": [
+        {
+          "id": "contract",
+          "title": "Validate and contain",
+          "intro": "Requests ride a conveyor into the model, and JSON blocks come out, some of them malformed. Run 50 requests with Validate output off first, then add the safeguards one at a time.",
+          "stages": [
+            {
+              "id": "request",
+              "title": "Clear inputs go in",
+              "body": "Each request enters the model block in the same format: a fixed system prompt, the user message, and the schema the answer must follow. Clear, consistent inputs are the first part of the contract. If every request looked different, you could not tell whether a bad answer came from the model or from what you sent."
+            },
+            {
+              "id": "output",
+              "title": "Output comes out",
+              "body": "JSON blocks leave the model. Most have the right shape. Some are red: a missing field, a wrong type, or text that is not JSON at all. The Model reliability slider sets how often this happens. Even at 95%, one in twenty is broken, and at real traffic that is a lot of broken answers."
+            },
+            {
+              "id": "validate",
+              "title": "The validator gate",
+              "body": "The gate checks each block against the schema. Good blocks pass through to users. Red blocks are stopped and sent down the failure path. With Validate output off, the gate is gone, and red blocks go straight to users. Watch the \"bad answers that reached users\" counter: only validation keeps it at zero."
+            },
+            {
+              "id": "retry",
+              "title": "Retry once with the error",
+              "body": "A rejected block goes back to the model once, with the validation error attached, such as \"missing field: category\". Many come back fixed. This adds a little cost and time per failure, which shows in the retries and cost counters. Only one retry: if it fails again, the block moves on rather than looping."
+            },
+            {
+              "id": "fallback",
+              "title": "Fall back to simpler",
+              "body": "Blocks that fail the retry go to the fallback: a simpler path such as a template reply or a rule-based answer. It is less clever but always valid, so the user still gets something correct and on time. The fallback is what lets you promise a response even when the model misbehaves."
+            },
+            {
+              "id": "person",
+              "title": "Route to a person",
+              "body": "Anything the fallback cannot handle safely goes to a person. This is the last stop, and it should be rare. If many blocks reach it, that is a signal: your prompt, schema or model choice needs work. A person in the path is also a limit on harm when the cost of a wrong answer is high."
+            }
+          ],
+          "tryThis": [
+            "Set Model reliability to 80%, turn Validate output off, and press Run 50 requests. Notice the bad answers that reached users counter climbs to about 10.",
+            "Turn Validate output on, leave Retry once and Fallback off, and run again. Notice no bad answers reach users, but every failure goes straight to Person.",
+            "Turn on Retry once and Fallback and run again. Notice most failures are fixed by the retry, a few land on the fallback, and very few reach a person, at a small extra cost.",
+            "Drop Model reliability to 50% with all safeguards on. Notice users still get no bad answers, but retries, cost and fallback use rise sharply."
+          ]
+        },
+        {
+          "id": "routing",
+          "title": "Routing by difficulty",
+          "intro": "Requests of different difficulty, shown as small, medium and large cubes, reach a router. Compare the three Routing options on cost, latency and accuracy.",
+          "stages": [
+            {
+              "id": "router",
+              "title": "The router decides",
+              "body": "Each cube is a request, and its size is how hard it is. The router looks at each one and decides which model gets it. In Route by difficulty mode, anything below the difficulty threshold goes to the small model and the rest go to the large one. In a real system the router might be a rule, a classifier or a small model itself."
+            },
+            {
+              "id": "small-model",
+              "title": "Small model: fast, cheap",
+              "body": "The small model answers quickly and at a fraction of the cost per request. On small cubes it is just as accurate as the large model. On large cubes its accuracy drops, because the task needs more capability than it has. Send it everything and your bill falls, but so does the quality of hard answers."
+            },
+            {
+              "id": "large-model",
+              "title": "Large model: capable, costly",
+              "body": "The large model handles the hardest cubes well, but each call is slower and costs much more. Sending it the easy cubes is safe but wasteful: you pay large-model prices for work the small model would have done just as well. Watch average latency and total cost when everything goes here."
+            },
+            {
+              "id": "trade-off",
+              "title": "Finding the trade-off",
+              "body": "The three metrics pull against each other. Cost and latency favour the small model; accuracy on hard tasks favours the large one. Routing by difficulty gets most of the accuracy of the large model at a much lower cost. The threshold is where you pick your balance, and like a pinned model version, it should be tested before you change it."
+            }
+          ],
+          "tryThis": [
+            "Set Routing to All to large model and press Run 40 requests. Note the total cost, average latency and accuracy.",
+            "Switch to All to small model and run again. Notice cost and latency fall, but accuracy drops because the large cubes are answered badly.",
+            "Switch to Route by difficulty and run again. Notice accuracy is close to the all-large run at a much lower cost.",
+            "Move the Difficulty threshold high, then low, running each time. Notice a high threshold sends hard cubes to the small model and accuracy drops; a low one raises cost."
+          ]
+        }
+      ],
+      "quiz": [
+        {
+          "prompt": "Your model returns valid JSON 97% of the time. A teammate says that is good enough to skip validation. You serve 100,000 requests a day. What do you say?",
+          "options": [
+            "Agree, because 97% is a high success rate",
+            "Disagree: that is about 3,000 broken answers a day, so check every answer before using it",
+            "Agree, but raise the temperature so the model tries harder"
+          ],
+          "answer": 1,
+          "explain": "A small failure rate at scale is a large number of bad answers reaching users. Raising temperature makes output more varied, which tends to make format errors more likely, not less."
+        },
+        {
+          "prompt": "Validation fails on an answer that is missing the \"category\" field. What is the best first step?",
+          "options": [
+            "Retry up to ten times until it passes",
+            "Send it to a person immediately",
+            "Retry once, including the validation error in the request"
+          ],
+          "answer": 2,
+          "explain": "One retry with the specific error often fixes the problem cheaply, and then you fall back or route to a person. Retrying many times adds cost and latency and rarely fixes what one informed retry could not."
+        },
+        {
+          "prompt": "After a quiet weekend, your bot's replies are suddenly longer and your JSON parser fails more often. No one changed your code. What practice would most likely have prevented this?",
+          "options": [
+            "Pinning the exact model version and testing each upgrade before switching",
+            "Using a larger context window",
+            "Routing more requests to the large model"
+          ],
+          "answer": 0,
+          "explain": "If your code uses a model name that moves to a newer version, behaviour can change without any code change. A larger window or model does not stop a silent version change from breaking your contract."
+        }
+      ]
+    },
+    {
+      "id": "p2l1-e5",
+      "episode": 5,
+      "title": "Prompt design",
+      "tagline": "Prompts are part of the codebase: written, tested and versioned.",
+      "sections": [
+        {
+          "heading": "The system prompt",
+          "body": "The system prompt is the standing set of instructions the model gets on every call. It sets the model's role (who it is, such as a support assistant for Kestrel Travel), its goal (what a good outcome is), its rules (what it must and must not do) and its output format (the exact shape of the answer). Treat it like code. It decides how your product behaves, it has bugs, and a careless edit can break things that used to work. So it gets written with care, reviewed, tested and versioned."
+        },
+        {
+          "heading": "Be explicit, and give reasons",
+          "body": "Be explicit and specific about what a good output looks like. \"Be helpful\" tells the model nothing it did not already assume. \"Answer in under 80 words, quote the policy section, and end with one next step\" does. Then state the reason behind each rule. \"Never promise a refund amount, because amounts depend on fare rules the agent checks later\" works better than the bare rule. The model applies rules more accurately when it knows the purpose, and it can handle cases the rule did not mention."
+        },
+        {
+          "heading": "Examples and structure",
+          "body": "Use examples to show the expected format and tone. One good example often teaches more than a paragraph of description. Vary your examples, though. If all three are about baggage and all start with \"Sorry\", the model will copy that too closely. For long prompts, use clear sections with marked boundaries: instructions, reference material, and examples. Headings or tags help the model tell your rules apart from a policy document you pasted in, so it does not treat a line from the policy as an instruction."
+        },
+        {
+          "heading": "When information is missing",
+          "body": "Tell the model what to do when it does not have what it needs. It has three good options: ask the user a clarifying question, say plainly that it does not know, or stop and hand over. Pick one for each kind of gap. Without this rule, the model fills the gap with a plausible guess, because that is what it was trained to do. A support bot that says \"I can't find that booking, can you check the reference?\" is far better than one that makes up a flight time."
+        },
+        {
+          "heading": "Version, review, test",
+          "body": "Store prompts in version control, next to the code that uses them. Review prompt changes like code changes. Test every change against a fixed set of questions, the same set each time, so you can compare scores between versions. Then watch for the common mistakes. Contradictory rules, like \"always be brief\" and \"always explain fully\", make behaviour unpredictable. Adding a new rule for every failure turns the prompt into a pile of special cases. Emphasis in place of explanation, such as \"NEVER\" in capitals, works worse than one sentence on why."
+        }
+      ],
+      "systemsLens": "An unclear prompt produces errors that appear in later steps, where they are harder to trace.",
+      "remember": [
+        "Be explicit and explain the reasons.",
+        "Use examples.",
+        "Test and version every prompt."
+      ],
+      "models": [
+        {
+          "id": "prompt-stack",
+          "title": "Building a system prompt",
+          "intro": "The system prompt is a stack of slabs, one per section, beside 12 test questions. This is a simulated scorer that shows which kinds of questions each section helps, not a live model. Turn all sections off, press Run test set, then add sections back one at a time.",
+          "stages": [
+            {
+              "id": "role",
+              "title": "Role",
+              "body": "The bottom slab tells the model who it is: a support assistant for Kestrel Travel. With it, test questions about tone and scope start to pass, because the model knows it should answer as an airline support agent and not as a general chatbot. On its own, though, the role says nothing about what a good answer looks like."
+            },
+            {
+              "id": "goal",
+              "title": "Goal",
+              "body": "The goal slab says what a good outcome is, such as resolving the customer's issue or giving them one clear next step. Questions where the model used to ramble or answer the wrong thing now pass. A clear goal gives the model a way to choose between two answers that both sound fine."
+            },
+            {
+              "id": "rules",
+              "title": "Rules, with reasons",
+              "body": "The rules slab sets limits, like not promising refund amounts. Rules alone fix some cubes, but edge cases still fail. Turn on Reasons for rules and more cubes turn green, because the model can apply the purpose to cases the rule did not name. Turn on Contradictory rule and watch cubes that used to pass go red."
+            },
+            {
+              "id": "format",
+              "title": "Output format",
+              "body": "The format slab defines the exact shape of the answer: length, structure and fields. Questions that were right in content but wrong in shape now pass. If anything downstream parses the answer, this slab is not optional. A correct answer in the wrong format is still a failure for the code that reads it."
+            },
+            {
+              "id": "examples",
+              "title": "Examples",
+              "body": "The examples slab shows a few good answers. Tone and format questions improve quickly, because the model can copy the pattern. The examples here are varied on purpose. If they all looked the same, the model would copy their details too, and questions on other topics would start to fail."
+            },
+            {
+              "id": "missing-info",
+              "title": "When information is missing",
+              "body": "This slab tells the model to ask, say it does not know, or stop when it lacks what it needs. Watch the cubes for questions that have no answer in the policy, such as a booking that does not exist. Without this slab they fail with a confident guess. With it, they pass with an honest reply."
+            },
+            {
+              "id": "test-set",
+              "title": "The test set",
+              "body": "The 12 cubes are a fixed test set. Each run gives a score and bumps the version, v1, v2 and so on, and keeps the previous score beside it. Because the questions never change, you can see exactly what a prompt edit helped or broke. That comparison is the whole point of testing prompts."
+            }
+          ],
+          "tryThis": [
+            "Turn every section off and press Run test set. Then turn on Role, Goal and Rules and run again. Notice the score rises and the version number goes up, with the old score kept for comparison.",
+            "With Rules on, run once with Reasons for rules off and once with it on. Notice which extra cubes turn green when the reasons are added.",
+            "Turn on Missing-info rule and run. Notice the cubes for questions with no answer in the policy switch from red to green.",
+            "Turn on Contradictory rule and run. Notice the score drops and cubes that passed in the last version turn red."
+          ]
+        }
+      ],
+      "quiz": [
+        {
+          "prompt": "Your bot sometimes promises refund amounts. A teammate adds \"NEVER PROMISE REFUND AMOUNTS!!!\" to the top of the prompt. What would likely work better?",
+          "options": [
+            "Repeat the rule three times in different sections",
+            "State the rule once with the reason: amounts depend on fare rules that are checked later",
+            "Remove all other rules so this one stands out"
+          ],
+          "answer": 1,
+          "explain": "Models apply rules more accurately when they know the purpose, and the reason also helps with cases the rule does not name. Capitals and repetition are emphasis in place of explanation."
+        },
+        {
+          "prompt": "You edit the system prompt to fix one bad answer, and it fixes it. How do you know you did not break something else?",
+          "options": [
+            "Run the same fixed test set before and after, and compare the scores",
+            "Ask the model whether the new prompt is better",
+            "Try the one question that was failing a few more times"
+          ],
+          "answer": 0,
+          "explain": "Only a fixed set of questions run on both versions shows what improved and what regressed. Retrying the one failing question proves the fix but tells you nothing about the rest."
+        },
+        {
+          "prompt": "A customer asks about a booking reference that does not exist. Your bot replies with a made-up flight time. Which part of the prompt is missing?",
+          "options": [
+            "More examples of good answers",
+            "A stricter output format",
+            "A rule for what to do when information is missing: ask, say it does not know, or stop"
+          ],
+          "answer": 2,
+          "explain": "Without that rule, the model fills gaps with a plausible guess. Examples and format shape how answers look, but they do not tell the model what to do when the facts are not there."
+        }
+      ]
+    },
+    {
+      "id": "p2l1-e6",
+      "episode": 6,
+      "title": "Context engineering",
+      "tagline": "Deciding what the model sees at each step.",
+      "sections": [
+        {
+          "heading": "From prompts to context",
+          "body": "Prompt engineering is about the wording of your instructions. Context engineering is about everything the model receives at each step. For an agent, the instructions are a small part of that. The context window also holds tool definitions, retrieved documents, the conversation so far and the results of earlier actions. Each step of an agent is a new call with a new context, and you decide what goes into it. Good wording cannot fix a context that is full of the wrong things."
+        },
+        {
+          "heading": "The attention budget",
+          "body": "As context grows, output quality can decline. The model has to spread its attention across everything you give it, so a key fact buried among old tool results and loosely related documents is easier to miss. More context is not better context. Think of attention as a budget that every token spends. The objective is the smallest set of relevant information that makes the correct outcome likely. Smaller is also cheaper and faster, because you pay for every input token on every call."
+        },
+        {
+          "heading": "Keeping the window lean",
+          "body": "Three techniques do most of the work. Summarise earlier history: replace twenty old turns with a short note of what was decided and what is still open. Remove outdated tool results: once the agent has read a search result and acted on it, the full text rarely needs to stay. Load information only when it is needed, instead of putting every possible document in upfront. Better still, let the agent retrieve information itself through search or file access. It can fetch the refund policy when a refund comes up, and only then."
+        },
+        {
+          "heading": "Finding the right information",
+          "body": "When the agent searches, it usually searches by meaning. Documents are split into chunks, and each chunk becomes an embedding: a list of numbers that places it in a space of meaning. The query becomes an embedding too, and the nearest chunks are returned. That is how \"I want my money back\" finds the refund policy with no shared words. Meaning search can miss exact strings like booking codes, so many systems combine it with keyword search. Either way, only the top few chunks go into the context."
+        },
+        {
+          "heading": "Caching and long tasks",
+          "body": "Prompt caching reuses the unchanged part of the context across calls. If your system prompt and tool definitions stay the same at the start of every call, the provider can cache that prefix and charge less for it and answer faster. So keep the stable parts first and the changing parts last. For long tasks that run over hours or across sessions, store notes and progress outside the context window, such as in a file or database. The agent reads back what it needs, instead of carrying its whole history in every call."
+        }
+      ],
+      "systemsLens": "The context window is a stock with a fixed limit. Manage what enters and what leaves it.",
+      "remember": [
+        "Context is a limited budget.",
+        "Keep only what is relevant.",
+        "Load the rest on demand."
+      ],
+      "models": [
+        {
+          "id": "context-window",
+          "title": "What fills the window",
+          "intro": "A long glass container fills with coloured blocks as an agent works. Push Conversation turns to 40 with every technique off, then turn techniques on one by one and watch tokens, cost and answer quality.",
+          "stages": [
+            {
+              "id": "system",
+              "title": "System instructions",
+              "body": "The grey blocks at the start are the system instructions: role, goal, rules and format. They are the same on every call, and usually small. They sit first in the window, which matters later for caching. On their own they leave the window almost empty and the attention budget full."
+            },
+            {
+              "id": "tools",
+              "title": "Tool definitions",
+              "body": "The purple blocks are tool definitions: the name, description and input schema for each tool the agent can call. They are sent on every call too. A handful of tools is cheap. Fifty tools with long descriptions take real space, and the model must read all of them each time to pick one."
+            },
+            {
+              "id": "retrieved",
+              "title": "Retrieved documents",
+              "body": "The blue blocks are documents. Loaded all upfront, they fill a big part of the window on the first turn, and most are unrelated to the question. Turn on Load documents on demand and only the relevant ones arrive, when they are needed. The window shrinks and the useful facts are easier for the model to find."
+            },
+            {
+              "id": "history",
+              "title": "Conversation history",
+              "body": "The teal blocks are the conversation so far. They grow with every turn, because the model keeps nothing between calls and the app must resend the history. By turn 40 they can be the largest part of the window. Turn on Summarise old history and older turns collapse into one short block."
+            },
+            {
+              "id": "tool-results",
+              "title": "Tool results",
+              "body": "The amber blocks are results of earlier actions: search pages, API responses, file contents. They can be large and go stale fast. Once the agent has acted on a result, keeping the full text helps little. Turn on Drop old tool results and the old amber blocks leave the window."
+            },
+            {
+              "id": "attention-budget",
+              "title": "The attention budget",
+              "body": "The two meters show the attention budget and answer quality. As irrelevant blocks pile up, both fall, even before the window is full. The model has more to look through and the key facts are crowded out. Turn on Notes outside the context and progress is saved elsewhere and read back only when needed, so long tasks keep the meters up."
+            },
+            {
+              "id": "caching",
+              "title": "Prompt caching",
+              "body": "Turn on Prompt caching and the stable blocks at the start, the system instructions and tool definitions, get a glowing outline. They are the cached prefix: reused across calls at lower cost and with a faster start. The cached share metric shows how much of each call that covers. Anything that changes at the start of the window breaks the cache."
+            }
+          ],
+          "tryThis": [
+            "Set Conversation turns to 40 with every toggle off. Notice tokens used and cost per call climb, while the answer-quality meter falls.",
+            "Turn on Summarise old history and Drop old tool results. Notice tokens used drop sharply and answer quality recovers.",
+            "Turn on Load documents on demand. Notice most blue blocks leave the window and quality goes up, not down, even with less information in it.",
+            "Turn on Prompt caching. Notice the glowing outline on the first blocks, a higher cached share, and a lower cost per call."
+          ]
+        },
+        {
+          "id": "embedding-lookup",
+          "title": "Searching by meaning",
+          "intro": "About 48 policy chunks from the fictional airline Kestrel Travel float as points, grouped by meaning. This is a small teaching embedding shown in 3D; real ones have hundreds or thousands of dimensions. Try the preset \"I want my money back\" first, with Search by set to Meaning.",
+          "stages": [
+            {
+              "id": "chunks",
+              "title": "Policies as chunks",
+              "body": "Kestrel's policy documents are split into short chunks, and each chunk is one point. Points that mean similar things sit close together, so you see clusters: refunds, baggage, booking changes, visas and documents, loyalty points, and special assistance. Nobody placed them by hand. Their positions come from their embeddings."
+            },
+            {
+              "id": "embed",
+              "title": "Chunks become vectors",
+              "body": "Each chunk was passed through an embedding model, which turns text into a vector: a list of numbers. Here you see three of them as a position in space. Real embeddings have hundreds or thousands, but the rule is the same: similar meaning, nearby vectors. Chunks are embedded once, ahead of time, and stored in an index."
+            },
+            {
+              "id": "query",
+              "title": "The query joins the map",
+              "body": "When you search, your query goes through the same embedding model and appears as a bright point. Where it lands depends on what it means, not which words it uses. \"I want my money back\" lands near the refund cluster even though it never says \"refund\"."
+            },
+            {
+              "id": "nearest",
+              "title": "The nearest chunks",
+              "body": "Lines connect the query to its k nearest chunks, ranked by cosine similarity: a score of how closely two vectors point the same way. Higher means closer in meaning. The side list shows each chunk with its score. Top k sets how many you take. Too few may miss the answer; too many bring in noise."
+            },
+            {
+              "id": "keywords",
+              "title": "Exact words",
+              "body": "In Keywords mode, only chunks that share exact words with the query light up. This misses \"money back\" entirely, but it is the right tool for exact strings. A booking code like REF-2041 has no meaning an embedding can place well, so meaning search drifts. Keyword search finds it directly. That is why Both exists."
+            },
+            {
+              "id": "into-context",
+              "title": "Into the context window",
+              "body": "Only the top few chunks from the side list go into the model's context window, not all 48. This is load on demand in practice: the agent fetches what this question needs, and the window stays lean. If the right chunk is not in the top k, the model never sees it and may answer with a confident guess."
+            }
+          ],
+          "tryThis": [
+            "Choose \"I want my money back\", set Search by to Meaning, and press Search. Notice the lines reach the refund cluster although no word matches the policy text.",
+            "Keep the same query and switch Search by to Keywords. Press Search. Notice few or no refund chunks light up, because the exact words are missing.",
+            "Choose \"booking REF-2041\" and compare Meaning, Keywords and Both. Notice only keyword matching finds the exact code reliably, and Both gets it plus related chunks.",
+            "Choose \"do I need a visa for Singapore\" and move Top k from 1 to 8. Notice low-scoring chunks from other clusters join the list as k grows."
+          ]
+        }
+      ],
+      "quiz": [
+        {
+          "prompt": "Your agent's answers got worse after you added every policy document to the context \"so it always has the answer\". What is the most likely cause?",
+          "options": [
+            "The documents are too old",
+            "Irrelevant material is using up the attention budget, so key facts are easier to miss",
+            "The model cannot read documents longer than one page"
+          ],
+          "answer": 1,
+          "explain": "More context is not better context; quality can decline as the window fills with unrelated material. Loading documents on demand gives the model the smallest relevant set instead."
+        },
+        {
+          "prompt": "A customer types \"status of booking REF-2041\". Your search uses meaning only and returns general booking-change policies, not the booking. What should you change?",
+          "options": [
+            "Use a larger embedding model",
+            "Increase Top k to 20",
+            "Combine meaning search with keyword search, so exact codes are matched directly"
+          ],
+          "answer": 2,
+          "explain": "Exact strings like booking codes are found by keywords, not meaning. A bigger embedding or larger k still ranks by meaning and mostly adds noise to the context."
+        },
+        {
+          "prompt": "Every call to your agent starts with the same 6,000-token system prompt and tool definitions, followed by the conversation. How can you cut cost and latency without removing anything?",
+          "options": [
+            "Use prompt caching, keeping the unchanged part at the start of every call",
+            "Move the system prompt to the end so the conversation is read first",
+            "Summarise the system prompt differently on each call"
+          ],
+          "answer": 0,
+          "explain": "Caching reuses the unchanged prefix across calls at lower cost and with a faster start. Moving or rewording that prefix on each call changes the start of the context and breaks the cache."
+        }
+      ]
+    }
+  ]
+}
